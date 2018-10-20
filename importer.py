@@ -1,10 +1,14 @@
 from pynput import mouse as ms
-from pynput.keyboard import Key, Controller
+from pynput.keyboard import Key, Controller, Listener
 import time
 import csv
 from tkinter import filedialog
 from tkinter import *
 import sys
+import threading
+from threading import Thread
+import _thread
+from tkinter import messagebox
 
 run = True
 resetX = 0
@@ -19,10 +23,15 @@ def on_click(x, y, button, pressed):
         # Stop listener
         return False
 
-def click_esc(key):
-    if key == Key.esc:
-        # Stop listener
-        sys.exit()
+def on_press(key):
+	if key == Key.esc:
+		# Stop listener
+		print("stopping")
+		_thread.interrupt_main()
+
+def stopper():
+	with Listener(on_press=on_press) as listener:
+		listener.join()  
 
 
 def month_selector(month):
@@ -168,16 +177,15 @@ def state_selector(country, state):
     return switcher.get(state)
 
 root = Tk()
-root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
+root.withdraw()
+root.filename =  filedialog.askopenfilename(initialdir = "/",title = "Select file",filetypes = (("csv files","*.csv"),("all files","*.*")))
 print (root.filename)
 file=open(root.filename, "r")
 reader = csv.reader(file)
-    
-print('please click the reset button on Sieupreme and let us do our magic')
-with ms.Listener(on_click=on_click) as listener:
-    listener.join()
 
-with ms.Listener(click_esc=click_esc) as listener:
+root.deiconify()
+messagebox.showinfo("Information","Upon clicking this OK button, the program will start listening for you to click on the RESET button in the Sieu profile page. Once you click that it will begin emulating keystrokes so if something goes wrong, press the ""ESC"" key to stop the program at any time")
+with ms.Listener(on_click=on_click) as listener:
     listener.join()
 
 time.sleep(1)
@@ -188,169 +196,175 @@ pnY = resetY + 70
 
 time_delay = 0.03
 
-for inputValue in reader:
-        time.sleep(time_delay)
-         
-        ms.Controller().position = (pnX, pnY)
-        ms.Controller().press(ms.Button.left)
-        ms.Controller().release(ms.Button.left)
-
-        time.sleep(time_delay)
-        
-        for char in inputValue[0]:
-            keyboard.press(char)
-            keyboard.release(char)
-            
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-        
-        for char in inputValue[1]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[2]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[3]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[4]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[5]:
-            keyboard.press(char)
-            keyboard.release(char)
-            
-        time.sleep(time_delay)     
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[6]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for char in inputValue[7]:
-            keyboard.press(char)
-            keyboard.release(char)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-        
-        for char in inputValue[8]:
-            keyboard.press(char)
-            keyboard.release(char)
-            
-        time.sleep(time_delay)   
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for tabs in range(country_selector(inputValue[10])):
-            keyboard.press(Key.down)
-            time.sleep(time_delay)
-            keyboard.release(Key.down)
-            time.sleep(time_delay)
-
-        time.sleep(time_delay)    
-        keyboard.press(Key.shift)
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-        keyboard.release(Key.shift)
-        time.sleep(time_delay)
-        keyboard.release(Key.tab)
-        time.sleep(time_delay)
-
-        for tabs in range(state_selector(inputValue[10], inputValue[9])):
-            keyboard.press(Key.down)
-            keyboard.release(Key.down)
-            
-
-        time.sleep(time_delay)    
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
-
-        for tabs in range(card_selector(inputValue[11])):
-            keyboard.press(Key.down)
-            keyboard.release(Key.down)
-
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
+if __name__ == '__main__':
+	threaded = Thread(target=stopper)
+	threaded.daemon = True
+	threaded.start()		
 
 
-        for char in inputValue[12]:
-            keyboard.press(char)
-            keyboard.release(char)
+	for inputValue in reader:
+	        time.sleep(time_delay)
+	         
+	        ms.Controller().position = (pnX, pnY)
+	        ms.Controller().press(ms.Button.left)
+	        ms.Controller().release(ms.Button.left)
 
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
+	        time.sleep(time_delay)
+	        
+	        for char in inputValue[0]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+	            
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+	        
+	        for char in inputValue[1]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[2]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[3]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[4]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[5]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+	            
+	        time.sleep(time_delay)     
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[6]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for char in inputValue[7]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+	        
+	        for char in inputValue[8]:
+	            keyboard.press(char)
+	            keyboard.release(char)
+	            
+	        time.sleep(time_delay)   
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for tabs in range(country_selector(inputValue[10])):
+	            keyboard.press(Key.down)
+	            time.sleep(time_delay)
+	            keyboard.release(Key.down)
+	            time.sleep(time_delay)
+
+	        time.sleep(time_delay)    
+	        keyboard.press(Key.shift)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+	        keyboard.release(Key.shift)
+	        time.sleep(time_delay)
+	        keyboard.release(Key.tab)
+	        time.sleep(time_delay)
+
+	        for tabs in range(state_selector(inputValue[10], inputValue[9])):
+	            keyboard.press(Key.down)
+	            keyboard.release(Key.down)
+	            
+
+	        time.sleep(time_delay)    
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
+
+	        for tabs in range(card_selector(inputValue[11])):
+	            keyboard.press(Key.down)
+	            keyboard.release(Key.down)
+
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
 
 
-        for char in inputValue[13]:
-            keyboard.press(char)
-            keyboard.release(char)
+	        for char in inputValue[12]:
+	            keyboard.press(char)
+	            keyboard.release(char)
 
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
 
-        for tabs in range(month_selector(inputValue[14])):
-            keyboard.press(Key.down)
-            keyboard.release(Key.down)
 
-        time.sleep(time_delay)
-        keyboard.press(Key.tab)
-        time.sleep(time_delay)
+	        for char in inputValue[13]:
+	            keyboard.press(char)
+	            keyboard.release(char)
 
-        for tabs in range(year_selector(inputValue[15])):
-            keyboard.press(Key.down)
-            keyboard.release(Key.down)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
 
-        time.sleep(time_delay)
-        ms.Controller().position = (saveX, saveY)
-        time.sleep(time_delay)
-        ms.Controller().press(ms.Button.left)
-        time.sleep(time_delay)
-        ms.Controller().release(ms.Button.left)
-        time.sleep(time_delay)
+	        for tabs in range(month_selector(inputValue[14])):
+	            keyboard.press(Key.down)
+	            keyboard.release(Key.down)
 
-        ms.Controller().position = (resetX, resetY)
-        time.sleep(time_delay)
-        ms.Controller().press(ms.Button.left)
-        time.sleep(time_delay)
-        ms.Controller().release(ms.Button.left)
-        time.sleep(time_delay)
+	        time.sleep(time_delay)
+	        keyboard.press(Key.tab)
+	        time.sleep(time_delay)
 
-    
+	        for tabs in range(year_selector(inputValue[15])):
+	            keyboard.press(Key.down)
+	            keyboard.release(Key.down)
+
+	        time.sleep(time_delay)
+	        ms.Controller().position = (saveX, saveY)
+	        time.sleep(time_delay)
+	        ms.Controller().press(ms.Button.left)
+	        time.sleep(time_delay)
+	        ms.Controller().release(ms.Button.left)
+	        time.sleep(time_delay)
+
+	        ms.Controller().position = (resetX, resetY)
+	        time.sleep(time_delay)
+	        ms.Controller().press(ms.Button.left)
+	        time.sleep(time_delay)
+	        ms.Controller().release(ms.Button.left)
+	        time.sleep(time_delay)
+
+	    
 
 
